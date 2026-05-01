@@ -3,6 +3,7 @@
 agenda_building_flow.txt
 data/student_performance.csv
 data/student_performance2.csv
+builder.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
