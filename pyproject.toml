@@ -1,0 +1,11 @@
+[project]
+name = "src_utils"
+version = "0.0.1"
+description = "Utility class for two microservices"
+authors = [{name = "Priyanshu", email = "priyan******@gmail.com"}]
+
+[tool.setuptools]
+packages = {find = {}}
+
+[tool.setuptools.dynamic]
+dependencies = {file = "requirements.txt"}
