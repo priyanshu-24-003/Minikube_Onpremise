@@ -10,8 +10,12 @@
     <div class="container">
         <h1>predict _____ </h1>
         <form method="POST">
-            <label for="name">feature 1 :</label>
-            <input type="text" id="name" name="name" required>
+            <label for="attendance"> Attendance </label>
+            <input type="text" id="attendance" name="attendance" required>
+
+            <label for="prev_score">Previous Score:</label>
+            <input type="text" id="prev_score" name="prev_score" required>
+
             <button type="submit">Submit</button>
         </form>
         {% if message %}
