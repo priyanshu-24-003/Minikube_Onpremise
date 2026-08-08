@@ -8,6 +8,7 @@ class Model_Trainer():
     def __init__(self,train_file):
         self.client = connect_s3(Credentials.s3_bucket, Credentials.aws_access_key, Credentials.aws_secret_key)
         self.train_data = self.client.fetch_df(train_file)
+        print(f"training data with shape {self.train_data.shape} loaded")
         self.X = self.train_data.iloc[:,:-1]
         self.Y = self.train_data.iloc[:,-1]
     

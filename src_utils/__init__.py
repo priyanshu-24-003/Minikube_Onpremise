@@ -48,7 +48,7 @@ class connect_s3():
 
 
 def save_data(data:pd.DataFrame, path):
-    data.to_csv(path,)
+    data.to_csv(path, index=False)
     pass
 
 def remove_data(path):
