@@ -1,11 +1,13 @@
 from pandas import DataFrame
 from sklearn.ensemble import RandomForestClassifier
-# from src_utils import 
+from src_utils import Credentials, connect_s3, save_model_typ, remove_data
+import io
 
 class Model_Trainer():
     
-    def __init__(self, train_data:DataFrame):
-        self.train_data = train_data
+    def __init__(self,train_file):
+        self.client = connect_s3(Credentials.s3_bucket, Credentials.aws_access_key, Credentials.aws_secret_key)
+        self.train_data = self.client.fetch_df(train_file)
         self.X = self.train_data.iloc[:,:-1]
         self.Y = self.train_data.iloc[:,-1]
     
@@ -21,6 +23,25 @@ class Model_Trainer():
         Trains model(self.Trainer) --- saves the model artifact
         """
         model = self.Trainer()
-        # a line that saves the model artifact
+
+        modelpath = './data/bin/model.pkl'
+        save_model_typ(model, modelpath)
+
+        #pushing model to stage
+        self.client.push_data(modelpath, "model/stage/")
+
+        remove_data(modelpath)
+        
         pass
-       
+
+
+
+if __name__ == "__main__":
+
+    #local
+    # di = Ingestion(datafile="./data/main.csv")
+
+    #production
+    MT = Model_Trainer('ingest/train.csv/./data/bin/train_ingest.csv')
+
+    MT.Training()    

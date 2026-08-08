@@ -1,7 +1,8 @@
 from pandas import DataFrame, read_csv
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from src_utils import Credentials, connect_s3, save_data, remove_data
+from src_utils import Credentials, connect_s3, save_data, remove_data, save_model_typ
+
 
 
 class Ingestion():
@@ -18,13 +19,14 @@ class Ingestion():
 
         #production
         self.client = connect_s3(Credentials.s3_bucket, Credentials.aws_access_key, Credentials.aws_secret_key)
-        self.df = self.client.fetch_data(self.url)
+        self.df = self.client.fetch_df(self.url)
     
-    def Encoding(self,)->None:
+    def Encoding(self,)->LabelEncoder:
         Le = LabelEncoder()
         Le.fit(self.df['passed'])
         self.df['passed'] = Le.transform(self.df['passed'])
 
+        return Le
         
     def Spliting(self)->tuple:
         train, test = train_test_split(self.df, test_size=0.2, random_state=42,)
@@ -34,7 +36,7 @@ class Ingestion():
 
     def Ingesting(self):
         self.Ingest()
-        self.Encoding()
+        encoder = self.Encoding()
         train,test = self.Spliting()
         print(train.head(4), train.shape)
         print()
@@ -42,19 +44,20 @@ class Ingestion():
 
         train_path = "./data/bin/train_ingest.csv"
         test_path = "./data/bin/test_ingest.csv"
+        encoder_path = "./data/bin/encoder.pkl"
 
         save_data(data=train, path=train_path)
         save_data(data=test, path=test_path)
+        save_model_typ(encoder, encoder_path)
 
         self.client.push_data(train_path, f'ingest/train.csv')
         self.client.push_data(test_path, f'ingest/test.csv')
+        self.client.push_data(encoder_path, f"model/encoder")
         
         remove_data(path=train_path)
         remove_data(path=test_path)
+        remove_data(path=encoder_path)
 
-        
-        # a line that saves train data
-        # a line that saves test data
         
 
 if __name__ == "__main__":

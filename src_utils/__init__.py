@@ -2,6 +2,8 @@ import pandas as pd
 import os
 import boto3
 from io import StringIO
+import pickle
+
 
 
 
@@ -24,7 +26,7 @@ class connect_s3():
             region_name=region_name
         )
 
-    def fetch_data(self, data):
+    def fetch_df(self, data):
         obj = self.s3_client.get_object(Bucket=self.bucket_name, Key=data)
         df = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8')))
         return df
@@ -36,6 +38,14 @@ class connect_s3():
             Key=f'{destination_folder}/{datafile}'     # S3 object key/path
         )
 
+    def fetch_model_typ(self, fileurl):
+        response = self.s3_client.get_object(Bucket=self.bucket_name, Key=fileurl)
+        byt = response["Body"].read()
+
+        return pickle.loads(byt)
+
+
+
 
 def save_data(data:pd.DataFrame, path):
     data.to_csv(path,)
@@ -44,6 +54,10 @@ def save_data(data:pd.DataFrame, path):
 def remove_data(path):
     os.remove(path)
     pass
+
+def save_model_typ(typ, path):
+    with open(path, "wb") as f:
+        t = pickle.dump(typ, f)
 
 
 

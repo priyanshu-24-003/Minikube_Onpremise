@@ -9,11 +9,11 @@ class Model_Pusher():
         self.x = self.test_data.iloc[:,:-1]
         self.y = self.test_data.iloc[:,-1]
 
-        self.current_model = model
+        self.stage_model = model
 
     def Pull_Best_Model(self,)->RandomForestClassifier:
         """
-        Pulls the best model so far from aws-s3 bucket
+        Pulls the best model (model/production/model.pkl) from aws-s3 bucket
         """
         return RandomForestClassifier
 
@@ -25,14 +25,14 @@ class Model_Pusher():
         else returns False
         """
         
-        y_current_model = self.current_model.predict(self.x)
-        acc_y_current = accuracy_score(self.y, y_current_model)
+        y_stage_model = self.stage_model.predict(self.x)
+        acc_y_stage = accuracy_score(self.y, y_stage_model)
 
 
         y_best_model = self.Pull_Best_Model().predict(self.x)
-        acc_y_best = accuracy_score(self.y, y_current_model)
+        acc_y_best = accuracy_score(self.y, y_best_model)
 
-        result = True if acc_y_current > acc_y_best else False
+        result = True if acc_y_stage > acc_y_best else False
         return result
 
     def Pusher(self,):
