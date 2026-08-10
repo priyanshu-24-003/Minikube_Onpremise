@@ -35,11 +35,7 @@ jobs:
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
           BUCKET: ${{ secrets.BUCKET }}
         run: |
-          docker run -p 3333:3333 -e AWS_ACCESS_KEY="$AWS_ACCESS_KEY" -e AWS_SECRET_KEY="$AWS_SECRET_KEY" -e BUCKET="$BUCKET" priyan5hu24/train-ingest:latest
-          
-          sleep 3 
-          
-          npx localtunnel --port 3333
+          docker run -d -p 3333:3333 -e AWS_ACCESS_KEY="$AWS_ACCESS_KEY" -e AWS_SECRET_KEY="$AWS_SECRET_KEY" -e BUCKET="$BUCKET" priyan5hu24/train-ingest:latest
 
 
       # Step 4: Check container health and view logs
