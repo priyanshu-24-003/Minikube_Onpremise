@@ -67,8 +67,6 @@ if __name__ == "__main__":
 
     #production
     di = Ingestion(datafile="main.csv")
-
-
     di.Ingesting()
 
 
