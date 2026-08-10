@@ -29,7 +29,7 @@ class Ingestion():
         return Le
         
     def Spliting(self)->tuple:
-        train, test = train_test_split(self.df, test_size=0.2, random_state=42,)
+        train, test = train_test_split(self.df, test_size=0.2, )
 
         return (train, test)
 
