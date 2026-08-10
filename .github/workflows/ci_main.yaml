@@ -1,50 +1,49 @@
-name: CI Pipeline
+name: Ingest Branch CI Pipeline
 
-# Trigger strictly on pushes to the main branch
+# Trigger strictly on pushes to the ingest branch
 on:
   push:
     branches:
-      - main
+      - ingest
 
 jobs:
-  build-and-test:
+  build-and-run:
     runs-on: ubuntu-latest
-
-    # Global environment variables mapping from GitHub Secrets
-    env:
-      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
 
     steps:
       # Step 1: Check out the repository code
       - name: Check out repository
         uses: actions/checkout@v4
-
-      # Step 2: Set up Python environment
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-          cache: "pip"
+          ref: ingest
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
+      # Step 2: Build the Docker image
+      # Passes secrets/env vars as build arguments if needed during image creation
+      - name: Build Docker Image
         run: |
-          python -m pip install -r requirements.txt
+          docker build -t train-ingest .
 
-      # Step 4: Automating the Training Pipeline using Github_Actions Server
-      - name: Run Data_Ingestion
+      - name: Tag Docker image
+        run: |
+          docker tag train-ingest priyan5hu24/train-ingest:latest
+      # Step 3: Run the Docker container on the GitHub server
+      # -d runs in detached mode, --name gives the container a predictable handle
+      - name: Run Docker Container
         env:
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
           BUCKET: ${{ secrets.BUCKET }}
-        run: python trainer_mic1/Ingest/data_ingestion.py 
+        run: |
+          docker run \
+            -p 3333:3333
+            -e AWS_ACCESS_KEY="$AWS_ACCESS_KEY" \
+            -e AWS_SECRET_KEY="$AWS_SECRET_KEY" \
+            -e BUCKET="$BUCKET" \
+            priyan5hu24/train-ingest:latest
 
-      - name: Run Model_Training
-        env:
-          BUCKET: ${{ secrets.BUCKET }}
-        run: python trainer_mic1/train/model_trainer.py
-
-      - name: Run Model_Pushing
-        env:
-          BUCKET: ${{ secrets.BUCKET }}
-        run: python trainer_mic1/push/model_pusher.py 
-
+      # Step 4: Check container health and view logs
+      - name: Verify Container Execution
+        run: |
+          docker ps -a
+          echo "=== Container Logs ==="
+          docker logs ingest-app
