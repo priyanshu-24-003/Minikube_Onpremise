@@ -26,6 +26,7 @@ jobs:
       - name: Tag Docker image
         run: |
           docker tag train-ingest priyan5hu24/train-ingest:latest
+          
       # Step 3: Run the Docker container on the GitHub server
       # -d runs in detached mode, --name gives the container a predictable handle
       - name: Run Docker Container
@@ -35,6 +36,11 @@ jobs:
           BUCKET: ${{ secrets.BUCKET }}
         run: |
           docker run -p 3333:3333 -e AWS_ACCESS_KEY="$AWS_ACCESS_KEY" -e AWS_SECRET_KEY="$AWS_SECRET_KEY" -e BUCKET="$BUCKET" priyan5hu24/train-ingest:latest
+          
+          sleep 3 
+          
+          npx localtunnel --port 3333
+
 
       # Step 4: Check container health and view logs
       - name: Verify Container Execution
