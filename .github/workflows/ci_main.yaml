@@ -26,7 +26,7 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag train-trainer priyan5hu24/train-trainer:latest
+          docker tag train-trainer ${{ secrets.DOCKERHUB_USERNAME }}/train-trainer:latest
           
       # Step 3: Run the Docker container on the GitHub server
       # -d runs in detached mode, --name gives the container a predictable handle
@@ -35,8 +35,9 @@ jobs:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
           BUCKET: ${{ secrets.BUCKET }}
+          docker_user: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
-          docker run -d --name trainer-app -p 4444:4444 -e AWS_ACCESS_KEY="$AWS_ACCESS_KEY" -e AWS_SECRET_KEY="$AWS_SECRET_KEY" -e BUCKET="$BUCKET" priyan5hu24/train-trainer:latest
+          docker run -d --name trainer-app -p 4444:4444 -e AWS_ACCESS_KEY="$AWS_ACCESS_KEY" -e AWS_SECRET_KEY="$AWS_SECRET_KEY" -e BUCKET="$BUCKET" "$docker_user"/train-trainer:latest
 
 
       # Step 4: Check container health and view logs
@@ -45,3 +46,15 @@ jobs:
           docker ps -a
           echo "=== Container Logs ==="
           docker logs trainer-app
+
+      # Step 5: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Step 6: Push image to Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/train-trainer:latest
