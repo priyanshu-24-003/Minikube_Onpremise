@@ -22,7 +22,7 @@ jobs:
       # Passes secrets/env vars as build arguments if needed during image creation
       - name: Build Docker Image
         run: |
-          docker build -t train-trainer .
+          docker build --no-cache -t train-trainer .
 
       - name: Tag Docker image
         run: |
@@ -36,7 +36,7 @@ jobs:
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
           BUCKET: ${{ secrets.BUCKET }}
         run: |
-          docker run -d --name trainer-app -p 3333:3333 -e AWS_ACCESS_KEY="$AWS_ACCESS_KEY" -e AWS_SECRET_KEY="$AWS_SECRET_KEY" -e BUCKET="$BUCKET" priyan5hu24/train-trainer:latest
+          docker run -d --name trainer-app -p 4444:4444 -e AWS_ACCESS_KEY="$AWS_ACCESS_KEY" -e AWS_SECRET_KEY="$AWS_SECRET_KEY" -e BUCKET="$BUCKET" priyan5hu24/train-trainer:latest
 
 
       # Step 4: Check container health and view logs
