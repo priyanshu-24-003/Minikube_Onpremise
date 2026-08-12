@@ -33,7 +33,7 @@ def prediction():
         label_maps = dict(zip(range(len(encoder.classes_)), encoder.classes_))      
 
         # Making prediction using Production model.
-        prediction = "pass" if label_maps[model.predict(input_data)[0]]=="Yes" else "Fail"
+        prediction = "PASS" if label_maps[model.predict(input_data)[0]]=="Yes" else "FAIL"
         message = f"This Student is more likely to  {prediction} the exam."
 
     return render_template('index.html', message=message)    
@@ -43,7 +43,15 @@ def prediction():
 def retrain_model():
 
     #This Url intracts with 3 different microservices (Ingestion, trainer, pusher)
-    
+    Urls = {
+        "Ingest":"url1",
+        "Trainer":"url2",
+        "Pusher":"url3",
+    }
+    try:
+        pass
+    except Exception as e:
+        pass
 
     return render_template("index.html", train_status="Training is Complete")
 
