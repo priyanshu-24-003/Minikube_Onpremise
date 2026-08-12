@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
+import requests
 import time
 from src_utils import Credentials, connect_s3
 import pandas as pd
+import asyncio
 
 app = Flask(__name__)
 
@@ -38,22 +40,33 @@ def prediction():
 
     return render_template('index.html', message=message)    
 
-        
+
 @app.route("/train", methods=["GET", "POST"])
 def retrain_model():
 
     #This Url intracts with 3 different microservices (Ingestion, trainer, pusher)
     Urls = {
-        "Ingest":"url1",
-        "Trainer":"url2",
-        "Pusher":"url3",
+        "Ingest":"http://localhost:3333/train",
+        "Trainer":"http://localhost:4444/train",
+        "Pusher":"http://localhost:5555/train",
     }
-    try:
-        pass
-    except Exception as e:
-        pass
 
-    return render_template("index.html", train_status="Training is Complete")
+    TrainStatus = True
+    #Running Entire Pipeline.
+    for key, value in Urls.items():
+        print(f"Running Stage :{key}")
+        try:
+            response = requests.get(value, timeout=5)
+            print(response.raise_for_status)
+            print(response.text)
+            print(f"Stage {key} Finish")
+            continue
+        except Exception as e:
+            print(f"Error in {key} stage")
+            TrainStatus = False
+            break
+
+    return render_template("index.html", train_status="Training is Complete" if TrainStatus == True else "Training Wasn't Successfull" )
 
 
 
