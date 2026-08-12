@@ -19,7 +19,7 @@ class Model_Pusher():
         """
         Pulls the best model (model/production/model.pkl) from aws-s3 bucket
         """
-
+        
         self.production_model = self.client.fetch_model_typ("model/Production//./data/bin/model.pkl")
 
         return self.production_model
@@ -47,9 +47,17 @@ class Model_Pusher():
         """
         Pushes staged model to Production (if stage outperforms Production) to s3
         """
-        
 
-        if self.Evaluate():
+      
+        try:
+            Evaluation = self.Evaluate()
+        except Exception as error:
+            print("No Production Model Found, Pushing the Latest Model ..")
+            Evaluation = True
+            pass
+            
+        if Evaluation:
+            print("Pushing Staged Model to Production")
             modelpath = './data/bin/model.pkl'
             save_model_typ(self.stage_model, modelpath)
             self.client.push_data(modelpath, "model/Production/")
