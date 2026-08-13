@@ -4,7 +4,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 #Copying flask_app dir to the app dir
-COPY trainer_mic1/ /app/trainer_mic1/
+COPY app_mic2/ /app/app_mic2/
 
 COPY pyproject.toml /app/
 COPY setup.py /app/
@@ -18,15 +18,14 @@ COPY data/bin /app/data/bin
 
 #exporting the dependencies in the docker image for our docker container to use.
 #This requirements.txt is actually from inside the app.
-RUN pip install pip install "flask[async]"
 RUN pip install -r requirements.txt
 
 RUN pip list
 
-EXPOSE 3333
+EXPOSE 5000
 
 #local
-CMD ["python", "trainer_mic1/Ingest/ingest_app.py"]  
+CMD ["python", "app_mic2/app.py"]  
 
 #Prod
 # CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "app:app"]

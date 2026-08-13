@@ -11,6 +11,11 @@ class Credentials():
     aws_access_key = os.getenv("AWS_ACCESS_KEY")
     aws_secret_key = os.getenv("AWS_SECRET_KEY")
     s3_bucket = os.getenv("BUCKET")
+
+    INGEST_SERVICE_URL = os.getenv("INGEST_SERVICE_URL")
+    TRAINER_SERVICE_URL = os.getenv("TRAINER_SERVICE_URL")
+    PUSHER_SERVICE_URL = os.getenv("PUSHER_SERVICE_URL")
+
     pass
 
 

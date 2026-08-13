@@ -1,9 +1,8 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 import requests
 import time
 from src_utils import Credentials, connect_s3
 import pandas as pd
-import asyncio
 
 app = Flask(__name__)
 
@@ -45,10 +44,19 @@ def prediction():
 def retrain_model():
 
     #This Url intracts with 3 different microservices (Ingestion, trainer, pusher)
+
+    #local
+    # Urls = {
+    #     "Ingest":"http://localhost:3333/train",
+    #     "Trainer":"http://localhost:4444/train",
+    #     "Pusher":"http://localhost:5555/train",
+    # }
+
+    #Production
     Urls = {
-        "Ingest":"http://localhost:3333/train",
-        "Trainer":"http://localhost:4444/train",
-        "Pusher":"http://localhost:5555/train",
+        "Ingest": Credentials.INGEST_SERVICE_URL,
+        "Trainer": Credentials.TRAINER_SERVICE_URL,
+        "Pusher": Credentials.PUSHER_SERVICE_URL,
     }
 
     TrainStatus = True
@@ -62,7 +70,7 @@ def retrain_model():
             print(f"Stage {key} Finish")
             continue
         except Exception as e:
-            print(f"Error in {key} stage")
+            print(f"Error in {key} stage : {e}")
             TrainStatus = False
             break
 
