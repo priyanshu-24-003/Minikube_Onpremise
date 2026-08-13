@@ -6,6 +6,10 @@ import io
 class Model_Trainer():
     
     def __init__(self,train_file):
+        """
+        train_file: training data that this class fetches from s3 bucket.
+        """
+
         self.client = connect_s3(Credentials.s3_bucket, Credentials.aws_access_key, Credentials.aws_secret_key)
         self.train_data = self.client.fetch_df(train_file)
         print(f"training data with shape {self.train_data.shape} loaded")
@@ -25,12 +29,14 @@ class Model_Trainer():
         """
         model = self.Trainer()
 
+        #saves the model to local data/bin dir
         modelpath = './data/bin/model.pkl'
         save_model_typ(model, modelpath)
 
-        #pushing model to stage
+        #pushing model from local dir to modle/stage in s3
         self.client.push_data(modelpath, "model/stage/")
 
+        #removing model from local
         remove_data(modelpath)
         
         pass
