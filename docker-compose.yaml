@@ -1,0 +1,51 @@
+services:
+  ingest:
+    image: priyan5hu24/train-ingest:latest
+    container_name: ingest
+    environment:
+      - AWS_ACCESS_KEY
+      - AWS_SECRET_KEY
+      - BUCKET
+    ports:
+      - "3333:3333" # Optional if only app talks to it; needed if host machine talks to it
+    restart: unless-stopped
+
+  trainer:
+    image: priyan5hu24/train-trainer:latest
+    container_name: trainer
+    environment:
+      - AWS_ACCESS_KEY
+      - AWS_SECRET_KEY
+      - BUCKET
+    ports:
+      - "4444:4444"
+    restart: unless-stopped
+
+  pusher:
+    image: priyan5hu24/train-pusher:latest
+    container_name: pusher
+    environment:
+      - AWS_ACCESS_KEY
+      - AWS_SECRET_KEY
+      - BUCKET
+    ports:
+      - "5555:5555"
+    restart: unless-stopped
+
+  servant:
+    image: priyan5hu24/servant-app:latest
+    container_name: servant
+    ports:
+      - "5000:5000"
+    environment:
+      - INGEST_SERVICE_URL=http://ingest:3333
+      - TRAINER_SERVICE_URL=http://trainer:4444
+      - PUSHER_SERVICE_URL=http://pusher:5555
+      - AWS_ACCESS_KEY
+      - AWS_SECRET_KEY
+      - BUCKET
+    depends_on:
+      - ingest
+      - trainer
+      - pusher
+    restart: unless-stopped
