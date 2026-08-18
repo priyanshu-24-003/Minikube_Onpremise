@@ -45,7 +45,15 @@ spec:
             secretKeyRef:
               name: cluster-secrets
               key: BUCKET
-   
+
+        - name: INGEST_SERVICE_URL
+          value: http://ingest:3333
+        
+        - name: TRAINER_SERVICE_URL
+          value: http://trainer:4444
+
+        - name: PUSHER_SERVICE_URL
+          value: http://pusher:5555
 
 ---
 apiVersion: v1
