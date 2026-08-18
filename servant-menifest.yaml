@@ -61,7 +61,7 @@ kind: Service
 metadata:
   name: servant-app-service
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: servant-app
   ports:
