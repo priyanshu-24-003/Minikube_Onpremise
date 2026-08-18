@@ -47,13 +47,13 @@ spec:
               key: BUCKET
 
         - name: INGEST_SERVICE_URL
-          value: http://ingest:3333
+          value: http://train-ingest-service:3333
         
         - name: TRAINER_SERVICE_URL
-          value: http://trainer:4444
+          value: http://train-trainer-service:4444
 
         - name: PUSHER_SERVICE_URL
-          value: http://pusher:5555
+          value: http://train-pusher-service:5555
 
 ---
 apiVersion: v1
