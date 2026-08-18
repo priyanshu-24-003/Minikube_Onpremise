@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: train-ingest
+  labels:
+    app: train-ingest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: train-ingest
+  template:
+    metadata:
+      labels:
+        app: train-ingest
+    spec:
+      containers:
+      - name: train-ingest
+        image: priyan5hu24/train-ingest:latest
+        imagePullPolicy: Never # Never: Pulls image form local-docker-engine
+        ports:
+        - containerPort: 3333
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "1"
+        env:
+        - name: AWS_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: AWS_ACCESS_KEY
+        
+        - name: AWS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: AWS_SECRET_KEY
+
+        - name: BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: BUCKET
+   
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: train-ingest-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: train-ingest
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3333
+      targetPort: 3333
