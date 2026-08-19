@@ -15,6 +15,7 @@ COPY src_utils/ /app/src_utils/
 
 COPY data/bin /app/data/bin
 
+ENV PYTHONUNBUFFERED=1
 
 #exporting the dependencies in the docker image for our docker container to use.
 #This requirements.txt is actually from inside the app.
@@ -25,7 +26,7 @@ RUN pip list
 EXPOSE 5555
 
 #local
-CMD ["python", "trainer_mic1/push/pusher_app.py"]  
+CMD ["python", "-u", "trainer_mic1/push/pusher_app.py"]  
 
 #Prod
 # CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "app:app"]
