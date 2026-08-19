@@ -37,7 +37,7 @@ class Model_Pusher():
 
 
 
-    def Evaluate(self)->bool:
+    def Evaluate(self)->[bool, bool]:
 
         """
         returns True if current model accuracy > best model accuracy
@@ -54,9 +54,10 @@ class Model_Pusher():
             print("stage accuracy " ,acc_y_stage, "\n", "production accuracy ", acc_y_best)
             result = True if acc_y_stage >= acc_y_best else False
             logger.info('Model Evaluation complete inside Evaluate method')
-            return result
+            return [result, True]
         except Exception as e:
             logger.error(f"Error {e} in {__name__} while Evaluating the Model")
+            return [False ,False]
 
 
     def Pusher(self,):
@@ -65,15 +66,14 @@ class Model_Pusher():
         """
 
       
-        try:
-            Evaluation = self.Evaluate()
-        except Exception as error:
-            print("No Production Model Found, Pushing the Latest Model ..")
-            Evaluation = True
-            pass
+
+        Evaluation = self.Evaluate()
 
         try:            
-            if Evaluation:
+            if Evaluation == [False, False] or Evaluation == [True, True]:
+                #pushing the staging model to production if no production model found
+                # or 
+                #Pushing the staging model to production if it outperforms the production model.
                 print("Pushing Staged Model to Production")
                 modelpath = './data/bin/model.pkl'
                 save_model_typ(self.stage_model, modelpath)
@@ -81,7 +81,7 @@ class Model_Pusher():
                 remove_data(modelpath)
                 logger.info(f"Accepted the model.{__name__}")
                 return "Accepted the model."
-            else:
+            elif Evaluation == [False, True]:
                 logger.info(f"Did Not Accept the model. {__name__}")
                 return "Did not Accept the model."
         except Exception as e:
