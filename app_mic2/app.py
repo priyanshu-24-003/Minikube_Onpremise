@@ -1,8 +1,16 @@
 from flask import Flask, render_template, request
 import requests
-import time
 from src_utils import Credentials, connect_s3
 import pandas as pd
+
+import logging, time
+import sys 
+
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
 
 app = Flask(__name__)
 
@@ -16,8 +24,6 @@ def prediction():
         attendance = float(request.form.get("attendance"))
         prev_score = float(request.form.get("prev_score"))
 
-        message = f"Predictions are {attendance/prev_score}, "
-
         #data preparation
         input_data = pd.DataFrame({"attendance_rate":[attendance,], "previous_score":[prev_score]})
 
@@ -30,7 +36,7 @@ def prediction():
         model = client.fetch_model_typ(model_path)
         encoder = client.fetch_model_typ(encoder_path)
 
-        #label Mapping to know the labels.
+        #Reverse label Mapping to know the Labels {int:"Yes", int:"NO"}
         label_maps = dict(zip(range(len(encoder.classes_)), encoder.classes_))      
 
         # Making prediction using Production model.
