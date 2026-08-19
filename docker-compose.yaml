@@ -42,9 +42,9 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - INGEST_SERVICE_URL=http://ingest:3333
-      - TRAINER_SERVICE_URL=http://trainer:4444
-      - PUSHER_SERVICE_URL=http://pusher:5555
+      - INGEST_SERVICE_URL=http://ingest:3333/train
+      - TRAINER_SERVICE_URL=http://trainer:4444/train
+      - PUSHER_SERVICE_URL=http://pusher:5555/train
       - AWS_ACCESS_KEY
       - AWS_SECRET_KEY
       - BUCKET
