@@ -3,26 +3,36 @@ from sklearn.metrics import accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 from src_utils import Credentials, connect_s3, save_model_typ, remove_data
 import io
+import logging
 
 class Model_Pusher():
 
     def __init__(self, datafile):
-        self.client = connect_s3(Credentials.s3_bucket, Credentials.aws_access_key, Credentials.aws_secret_key)
-        self.test_data = self.client.fetch_df(datafile)
-        print(f"testing data with shape {self.test_data.shape} loaded", )
-        self.x = self.test_data.iloc[:,:-1]
-        self.y = self.test_data.iloc[:,-1]
-        
-        self.stage_model = self.client.fetch_model_typ("model/stage//./data/bin/model.pkl")
+        try:
+            self.client = connect_s3(Credentials.s3_bucket, Credentials.aws_access_key, Credentials.aws_secret_key)
+            self.test_data = self.client.fetch_df(datafile)
+            print(f"testing data with shape {self.test_data.shape} loaded", )
+            self.x = self.test_data.iloc[:,:-1]
+            self.y = self.test_data.iloc[:,-1]
+            
+            self.stage_model = self.client.fetch_model_typ("model/stage//./data/bin/model.pkl")
+            logging.info(f"connected to S3 inside {__name__}")
+
+        except Exception as e:
+            logging.error(f"Error {e} in {__name__} while connecting to S3 inside Constructor of Model_Pusher class")
+
 
     def Pull_Best_Model(self,)->RandomForestClassifier:
         """
         Pulls the best model (model/production/model.pkl) from aws-s3 bucket
         """
-        
-        self.production_model = self.client.fetch_model_typ("model/Production//./data/bin/model.pkl")
+        try:
+            self.production_model = self.client.fetch_model_typ("model/Production//./data/bin/model.pkl")
+            logging.info('Pulled the best model from production/ inside s3 {__name__}')
+            return self.production_model
+        except Exception as e:
+            logging.error(f"Error {e} in {__name__} while Pulling the best production model from s3 inside Pull_Best_Model")
 
-        return self.production_model
 
 
     def Evaluate(self)->bool:
@@ -31,17 +41,21 @@ class Model_Pusher():
         returns True if current model accuracy > best model accuracy
         else returns False
         """
-        
-        y_stage_model = self.stage_model.predict(self.x)
-        acc_y_stage = accuracy_score(self.y, y_stage_model)
+        try:
+            y_stage_model = self.stage_model.predict(self.x)
+            acc_y_stage = accuracy_score(self.y, y_stage_model)
 
 
-        y_best_model = self.Pull_Best_Model().predict(self.x)
-        acc_y_best = accuracy_score(self.y, y_best_model)
+            y_best_model = self.Pull_Best_Model().predict(self.x)
+            acc_y_best = accuracy_score(self.y, y_best_model)
 
-        print("stage accuracy " ,acc_y_stage, "\n", "production accuracy ", acc_y_best)
-        result = True if acc_y_stage >= acc_y_best else False
-        return result
+            print("stage accuracy " ,acc_y_stage, "\n", "production accuracy ", acc_y_best)
+            result = True if acc_y_stage >= acc_y_best else False
+            logging.info('Model Evaluation complete inside Evaluate method')
+            return result
+        except Exception as e:
+            logging.error(f"Error {e} in {__name__} while Evaluating the Model")
+
 
     def Pusher(self,):
         """
@@ -55,19 +69,23 @@ class Model_Pusher():
             print("No Production Model Found, Pushing the Latest Model ..")
             Evaluation = True
             pass
+
+        try:            
+            if Evaluation:
+                print("Pushing Staged Model to Production")
+                modelpath = './data/bin/model.pkl'
+                save_model_typ(self.stage_model, modelpath)
+                self.client.push_data(modelpath, "model/Production/")
+                remove_data(modelpath)
+                logging.info(f"Accepted the model.{__name__}")
+                return "Accepted the model."
+            else:
+                logging.info(f"Did Not Accept the model. {__name__}")
+                return "Did not Accept the model."
+        except Exception as e:
+                logging.error(f"Error {e} in {__name__} in Pusher Method")
+                return "Pusher Method Failed"
             
-        if Evaluation:
-            print("Pushing Staged Model to Production")
-            modelpath = './data/bin/model.pkl'
-            save_model_typ(self.stage_model, modelpath)
-            self.client.push_data(modelpath, "model/Production/")
-            remove_data(modelpath)
-            print("Accepted the model.")
-            return True
-        else:
-            print("Did Not Accept the model.")
-            return False
-        
 
 
 
