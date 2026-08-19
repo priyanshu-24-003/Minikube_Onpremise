@@ -6,11 +6,7 @@ import pandas as pd
 import logging, time
 import sys 
 
-logging.basicConfig(
-    stream=sys.stdout,
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
+
 
 app = Flask(__name__)
 
