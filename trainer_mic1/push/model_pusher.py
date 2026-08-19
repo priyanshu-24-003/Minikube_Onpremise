@@ -68,7 +68,7 @@ class Model_Pusher():
       
 
         Evaluation = self.Evaluate()
-
+        print(Evaluation)
         try:            
             if Evaluation == [False, False] or Evaluation == [True, True]:
                 #pushing the staging model to production if no production model found
