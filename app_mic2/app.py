@@ -66,7 +66,8 @@ def retrain_model():
     for key, value in Urls.items():
         print(f"Running Stage :{key}")
         try:
-            response = requests.get(value, timeout=5)
+            headers = {"User-Agent": "Flask-App-5000"}
+            response = requests.get(value,headers=headers, timeout=10)
             print(response.raise_for_status)
             print(response.text)
             print(f"Stage {key} Finish")
