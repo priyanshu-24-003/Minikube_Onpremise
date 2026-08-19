@@ -68,7 +68,6 @@ class Model_Pusher():
         Evaluation = self.Evaluate()
         # [1]: is for weather is there any model in the cloud or not.
         print(Evaluation)
-        # exit()
         try:            
             if Evaluation == [False, False] or Evaluation == [True, True]:
                 #pushing the staging model to production if no production model found
