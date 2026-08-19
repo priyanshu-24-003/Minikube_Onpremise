@@ -4,6 +4,11 @@ from src_utils import Credentials, connect_s3, save_model_typ, remove_data
 import io
 import logging
 
+
+
+logger = logging.getLogger(__name__)
+
+
 class Model_Trainer():
     
     def __init__(self,train_file):
@@ -17,10 +22,10 @@ class Model_Trainer():
             print(f"training data with shape {self.train_data.shape} loaded")
             self.X = self.train_data.iloc[:,:-1]
             self.Y = self.train_data.iloc[:,-1]
-            logging.info(f"connected to S3 inside {__name__}")
+            logger.info(f"connected to S3 inside {__name__}")
 
         except Exception as e:
-            logging.error(f"Error {e} in {__name__} while connecting to S3 inside Constructor of Model_Trainer class")
+            logger.error(f"Error {e} in {__name__} while connecting to S3 inside Constructor of Model_Trainer class")
 
             
         
@@ -29,10 +34,10 @@ class Model_Trainer():
         try:
             model = RandomForestClassifier()
             model.fit(self.X, self.Y)
-            logging.info(f"Model training complete inside {__name__}")
+            logger.info(f"Model training complete inside {__name__}")
             return model
         except Exception as e:
-            logging.error(f"Error {e} in {__name__} while training model inside Trainer Method")
+            logger.error(f"Error {e} in {__name__} while training model inside Trainer Method")
 
 
     def Training(self)-> None:
@@ -51,10 +56,10 @@ class Model_Trainer():
 
             #removing model from local
             remove_data(modelpath)
-            logging.info(f"Model Traning Was Successfull inside {__name__}")
+            logger.info(f"Model Traning Was Successfull inside {__name__}")
             return True
         except Exception as e:
-            logging.error(f"Error {e} in {__name__} Inside main function")
+            logger.error(f"Error {e} in {__name__} Inside main function")
             return False
         pass
 
