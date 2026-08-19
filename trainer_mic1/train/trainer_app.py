@@ -1,5 +1,13 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from trainer_mic1.train.model_trainer import Model_Trainer
+import logging, time
+import sys 
+
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
 
 app = Flask(__name__)
 
@@ -9,14 +17,19 @@ def home():
     return render_template('index.html', route="home")
 
 
-@app.route("/train")
+@app.route("/train",methods=["GET", "POST"])
 def train():
 
     MT = Model_Trainer('ingest/train.csv/./data/bin/train_ingest.csv')
 
-    MT.Training()
+    Training = MT.Training()
 
-    return render_template('index.html', route='Training-model-training')
+    if Training:
+        message = {"TrainingStatus": f"{Training} Complete", "Time": time.asctime()}
+        logging.info(message)
+        return jsonify(message), 200    
+    else:
+        return jsonify({"TraningStatus":f"{Training} InComplete" }), 404
 
 
 
