@@ -28,6 +28,9 @@ spec:
             memory: "512Mi"
             cpu: "1"
         env:
+        - name: PYTHONUNBUFFERED # To Enable logs
+          value: "1"
+
         - name: AWS_ACCESS_KEY
           valueFrom:
             secretKeyRef:
