@@ -5,6 +5,8 @@ from src_utils import Credentials, connect_s3, save_model_typ, remove_data
 import io
 import logging
 
+logger = logging.getLogger(__name__)
+
 class Model_Pusher():
 
     def __init__(self, datafile):
@@ -16,10 +18,10 @@ class Model_Pusher():
             self.y = self.test_data.iloc[:,-1]
             
             self.stage_model = self.client.fetch_model_typ("model/stage//./data/bin/model.pkl")
-            logging.info(f"connected to S3 inside {__name__}")
+            logger.info(f"connected to S3 inside {__name__}")
 
         except Exception as e:
-            logging.error(f"Error {e} in {__name__} while connecting to S3 inside Constructor of Model_Pusher class")
+            logger.error(f"Error {e} in {__name__} while connecting to S3 inside Constructor of Model_Pusher class")
 
 
     def Pull_Best_Model(self,)->RandomForestClassifier:
@@ -28,10 +30,10 @@ class Model_Pusher():
         """
         try:
             self.production_model = self.client.fetch_model_typ("model/Production//./data/bin/model.pkl")
-            logging.info('Pulled the best model from production/ inside s3 {__name__}')
+            logger.info('Pulled the best model from production/ inside s3 {__name__}')
             return self.production_model
         except Exception as e:
-            logging.error(f"Error {e} in {__name__} while Pulling the best production model from s3 inside Pull_Best_Model")
+            logger.error(f"Error {e} in {__name__} while Pulling the best production model from s3 inside Pull_Best_Model")
 
 
 
@@ -51,10 +53,10 @@ class Model_Pusher():
 
             print("stage accuracy " ,acc_y_stage, "\n", "production accuracy ", acc_y_best)
             result = True if acc_y_stage >= acc_y_best else False
-            logging.info('Model Evaluation complete inside Evaluate method')
+            logger.info('Model Evaluation complete inside Evaluate method')
             return result
         except Exception as e:
-            logging.error(f"Error {e} in {__name__} while Evaluating the Model")
+            logger.error(f"Error {e} in {__name__} while Evaluating the Model")
 
 
     def Pusher(self,):
@@ -77,13 +79,13 @@ class Model_Pusher():
                 save_model_typ(self.stage_model, modelpath)
                 self.client.push_data(modelpath, "model/Production/")
                 remove_data(modelpath)
-                logging.info(f"Accepted the model.{__name__}")
+                logger.info(f"Accepted the model.{__name__}")
                 return "Accepted the model."
             else:
-                logging.info(f"Did Not Accept the model. {__name__}")
+                logger.info(f"Did Not Accept the model. {__name__}")
                 return "Did not Accept the model."
         except Exception as e:
-                logging.error(f"Error {e} in {__name__} in Pusher Method")
+                logger.error(f"Error {e} in {__name__} in Pusher Method")
                 return "Pusher Method Failed"
             
 

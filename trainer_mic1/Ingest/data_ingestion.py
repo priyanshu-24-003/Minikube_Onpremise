@@ -4,6 +4,7 @@ from sklearn.preprocessing import LabelEncoder
 from src_utils import Credentials, connect_s3, save_data, remove_data, save_model_typ
 import logging
 
+logger = logging.getLogger(__name__)
 
 class Ingestion():
     
@@ -21,35 +22,35 @@ class Ingestion():
         try:
             self.client = connect_s3(Credentials.s3_bucket, Credentials.aws_access_key, Credentials.aws_secret_key)
             self.df = self.client.fetch_df(self.url)
-            logging.info(f"connected to S3 inside {__name__}")
+            logger.info(f"connected to S3 inside {__name__}")
 
         except Exception as e:
-            logging.error(f"Error {e} in {__name__} while connecting to S3 inside Ingest Method")
+            logger.error(f"Error {e} in {__name__} while connecting to S3 inside Ingest Method")
         
     def Encoding(self,)->LabelEncoder:
         try:
             Le = LabelEncoder()
             Le.fit(self.df['passed'])
             self.df['passed'] = Le.transform(self.df['passed'])
-            logging.info(f"Method Encoding Succesfull inside {__name__}")
+            logger.info(f"Method Encoding Succesfull inside {__name__}")
             return Le
         except Exception as e:
-            logging.error(f"Error {e} in {__name__} inside Encoding Method")
+            logger.error(f"Error {e} in {__name__} inside Encoding Method")
 
 
         
     def Spliting(self)->tuple:
         try:    
             train, test = train_test_split(self.df, test_size=0.2, )
-            logging.info(f"Method Spliting Succesfull inside {__name__}")
+            logger.info(f"Method Spliting Succesfull inside {__name__}")
             return (train, test)
         except Exception as e:
-            logging.error(f"Error {e} in {__name__} inside Spliting Method")
+            logger.error(f"Error {e} in {__name__} inside Spliting Method")
 
 
     def Ingesting(self):
         try:
-            logging.info("Data Ingestion Started...")
+            logger.info("Data Ingestion Started...")
             self.Ingest()
             encoder = self.Encoding()
             train,test = self.Spliting()
@@ -72,10 +73,10 @@ class Ingestion():
             remove_data(path=train_path)
             remove_data(path=test_path)
             remove_data(path=encoder_path)
-            logging.info('Data Ingestion Completed')
+            logger.info('Data Ingestion Completed')
             return True
         except Exception as e:
-            logging.error(f"Error {e} in {__name__} inside Ingesting Method")
+            logger.error(f"Error {e} in {__name__} inside Ingesting Method")
             return False
         
 
