@@ -92,6 +92,14 @@ jobs:
                 --from-literal=BUCKET=${{ env.BUCKET }} \
                 --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Create Docker Registry Secret
+        run: |
+          kubectl create secret docker-registry dockerhub-secret \
+            --docker-server=https://index.docker.io/v1/ \
+            --docker-username=${{ secrets.DOCKERHUB_USERNAME }} \
+            --docker-password=${{ secrets.DOCKERHUB_TOKEN }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       # 3. Apply all 4 Kubernetes manifests
       - name: Deploy Kubernetes Manifests
         run: |

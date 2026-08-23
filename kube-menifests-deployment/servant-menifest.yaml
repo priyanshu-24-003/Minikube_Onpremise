@@ -14,11 +14,11 @@ spec:
       labels:
         app: servant-app
     spec:
+      imagePullSecrets:
+      - name: dockerhub-secret
       containers:
       - name: servant-app
         image: priyan5hu24/servant-app:latest
-        imagePullSecrets:
-        - name: dockerhub-secret
         ports:
         - containerPort: 5000
         resources:

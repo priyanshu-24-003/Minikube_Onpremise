@@ -14,11 +14,11 @@ spec:
       labels:
         app: train-pusher
     spec:
+      imagePullSecrets:
+      - name: dockerhub-secret
       containers:
       - name: train-pusher
         image: priyan5hu24/train-pusher:latest
-        imagePullSecrets:
-        - name: dockerhub-secret
         ports:
         - containerPort: 5555
         resources:

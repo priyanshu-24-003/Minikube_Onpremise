@@ -14,11 +14,12 @@ spec:
       labels:
         app: train-ingest
     spec:
+      imagePullSecrets:
+      - name: dockerhub-secret
       containers:
       - name: train-ingest
         image: priyan5hu24/train-ingest:latest
-        imagePullSecrets:
-        - name: dockerhub-secret
+
         ports:
         - containerPort: 3333
         resources:

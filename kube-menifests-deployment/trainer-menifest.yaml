@@ -14,11 +14,11 @@ spec:
       labels:
         app: train-trainer
     spec:
+      imagePullSecrets:
+      - name: dockerhub-secret
       containers:
       - name: train-trainer
         image: priyan5hu24/train-trainer:latest
-        imagePullSecrets:
-        - name: dockerhub-secret
         ports:
         - containerPort: 4444
         resources:
