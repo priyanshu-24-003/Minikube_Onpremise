@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: train-trainer
+  labels:
+    app: train-trainer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: train-trainer
+  template:
+    metadata:
+      labels:
+        app: train-trainer
+    spec:
+      containers:
+      - name: train-trainer
+        image: priyan5hu24/train-trainer:latest
+        imagePullSecrets:
+        - name: dockerhub-secret
+        ports:
+        - containerPort: 4444
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "1"
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+          
+        - name: AWS_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: AWS_ACCESS_KEY
+        
+        - name: AWS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: AWS_SECRET_KEY
+
+        - name: BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: BUCKET
+   
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: train-trainer-service
+spec:
+  type: ClusterIP
+  selector:
+    app: train-trainer
+  ports:
+    - name: http
+      protocol: TCP
+      port: 4444
+      targetPort: 4444

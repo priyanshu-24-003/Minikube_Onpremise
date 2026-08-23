@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  Continuous-Integration:
     runs-on: ubuntu-latest
 
     # Global environment variables mapping from GitHub Secrets
@@ -47,4 +47,57 @@ jobs:
         env:
           BUCKET: ${{ secrets.BUCKET }}
         run: python trainer_mic1/push/model_pusher.py 
+  
+  Continuous-Deployment:
+    #using needs to prevent this job running before CI finishes.
+    needs: Continuous-Integration 
+    runs-on: self-hosted
 
+    env:
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      BUCKET: ${{ secrets.BUCKET }}
+
+    steps:
+    
+      # fetching only kube-menifests from the github instead of entire code base main main branch
+      - name: Checkout Manifests Only
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            kube-menifests-deployment
+          sparse-checkout-cone-mode: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: $AWS_ACCESS_KEY
+          aws-secret-access-key: $AWS_SECRET_KEY
+          aws-region: us-east-1
+
+      # 1. Authenticate with Docker Hub (fixes pull rate limits & private image access)
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 2. setup secrets.
+      
+      - name: Create Kubernetes Secret
+        run: |
+          kubectl create secret generic cluster-secrets \
+                --from-literal=AWS_ACCESS_KEY=$AWS_ACCESS_KEY \
+                --from-literal=AWS_SECRET_KEY=$AWS_SECRET_KEY \
+                --from-literal=BUCKET=$BUCKET \
+                --dry-run=client -o yaml | kubectl apply -f -
+
+      # 3. Apply all 4 Kubernetes manifests
+      - name: Deploy Kubernetes Manifests
+        run: |
+          kubectl apply -f kube-menifests-deployment/ingest-menifest.yaml \
+                        -f kube-menifests-deployment/trainer-menifest.yaml \
+                        -f kube-menifests-deployment/pusher-menifest.yaml \
+                        -f kube-menifests-deployment/servant-menifest.yaml
+
+      

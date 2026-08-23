@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: train-pusher
+  labels:
+    app: train-pusher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: train-pusher
+  template:
+    metadata:
+      labels:
+        app: train-pusher
+    spec:
+      containers:
+      - name: train-pusher
+        image: priyan5hu24/train-pusher:latest
+        imagePullSecrets:
+        - name: dockerhub-secret
+        ports:
+        - containerPort: 5555
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "1"
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+
+        - name: AWS_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: AWS_ACCESS_KEY
+        
+        - name: AWS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: AWS_SECRET_KEY
+
+        - name: BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: cluster-secrets
+              key: BUCKET
+   
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: train-pusher-service
+spec:
+  type: ClusterIP
+  selector:
+    app: train-pusher
+  ports:
+    - name: http
+      protocol: TCP
+      port: 5555
+      targetPort: 5555
