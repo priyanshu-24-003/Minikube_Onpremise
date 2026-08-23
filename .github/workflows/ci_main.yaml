@@ -71,8 +71,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: $AWS_ACCESS_KEY
-          aws-secret-access-key: $AWS_SECRET_KEY
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_KEY }}
           aws-region: us-east-1
 
       # 1. Authenticate with Docker Hub (fixes pull rate limits & private image access)
@@ -87,9 +87,9 @@ jobs:
       - name: Create Kubernetes Secret
         run: |
           kubectl create secret generic cluster-secrets \
-                --from-literal=AWS_ACCESS_KEY=$AWS_ACCESS_KEY \
-                --from-literal=AWS_SECRET_KEY=$AWS_SECRET_KEY \
-                --from-literal=BUCKET=$BUCKET \
+                --from-literal=AWS_ACCESS_KEY=${{ env.AWS_ACCESS_KEY }} \
+                --from-literal=AWS_SECRET_KEY=${{ env.AWS_SECRET_KEY }} \
+                --from-literal=BUCKET=${{ env.BUCKET }} \
                 --dry-run=client -o yaml | kubectl apply -f -
 
       # 3. Apply all 4 Kubernetes manifests
