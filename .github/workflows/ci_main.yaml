@@ -109,9 +109,7 @@ jobs:
                         -f kube-menifests-deployment/servant-menifest.yaml
 
       # 4. Port forwarding to access app:
-      
-      - name : Accessing app using port-forwarding.
+    
+      - name: Check all running services and deployments.
         run: |
-          kubectl port-forward --address 0.0.0.0 svc/servant-app-service 5000:5000
-
-      
+          kubectl get all -A
